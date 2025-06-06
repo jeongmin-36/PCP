@@ -15,7 +15,7 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from typing import Dict, Tuple
 from openai import OpenAI
 import os
-
+import streamlit as st
 client = OpenAI(api_key=os.environ["OPENAI_API_KEY"])
 
 # ------------------------------ CONFIG ---------------------------------------
