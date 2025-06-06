@@ -46,13 +46,32 @@ if submitted:
 
     # -------------------- SECTION 2+ DEFINITIONS --------------------
     subsections = {
-        "2.1 Development Problem": "Briefly describe the core development issue the project aims to solve.",
-        "2.2 National Development Plan Alignment": "Explain how the project aligns with the country’s development strategy.",
-        "2.3 KOICA Priority Alignment": "Explain how the project aligns with KOICA’s priority areas.",
-        "3. Expected Results": "Summarize expected outcomes and outputs.",
-        "4. Sustainability and Risk": "Describe sustainability plan and major risks.",
-        "5. Lessons Learned": "Incorporate lessons from past projects or evaluations."
-    }
+    # SECTION 2
+    "2.1 Development Problem": "Briefly describe the core development issue the project aims to solve.",
+    "2.2 National Development Plan Alignment": "Explain how the project aligns with the country’s development strategy.",
+    "2.3 KOICA Priority Alignment": "Explain how the project aligns with KOICA’s priority areas.",
+
+    # SECTION 3
+    "3.1 Objective/Outcome/Output": "Outline objectives, expected outcomes, and outputs of the Project.",
+    "3.2 Activities": "Describe major activities, timeline, responsible bodies, and implementation sequence.",
+    "3.3 Budget": "Provide an illustrative output-activity-budget table with sample values, using markdown format.",
+
+    # SECTION 4
+    "4.1 Target Beneficiary": (
+        "Describe a) direct and indirect beneficiaries with numbers and gender segregation, "
+        "b) how they were selected, c) how they were involved in the project design and will be involved in implementation."
+    ),
+    "4.2 Stakeholders": (
+        "Analyze recipient organization’s capacity, budget, size, and also describe other stakeholders "
+        "with roles and coordination mechanisms."
+    ),
+
+    # SECTION 5
+    "5.1 Project Management": (
+        "Describe who will manage and operate the project, how coordination will happen with other programs, "
+        "and planning/operational responsibilities."
+    ),
+}
 
     language = "English"
 
