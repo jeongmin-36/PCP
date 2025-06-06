@@ -13,13 +13,13 @@ import os
 import textwrap
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from typing import Dict, Tuple
+from openai import OpenAI
+import os
 
-import openai
-import streamlit as st
+client = OpenAI(api_key=os.environ["OPENAI_API_KEY"])
 
 # ------------------------------ CONFIG ---------------------------------------
 MODEL = "gpt-4o-mini"  # cheaper + fast; swap to gpt-4o if needed
-openai.api_key = os.getenv("OPENAI_API_KEY")
 
 SUBSECTIONS: Dict[str, str] = {
     "2.1 Situation Analysis": "Explain the current social, economic, and sector‑specific context relevant to the project. Provide key statistics where possible.",
@@ -47,14 +47,14 @@ def generate_subsection(name: str, instruction: str, section1: str, language: st
         """
     ) + section1.strip()
 
-    response = openai.ChatCompletion.create(
-        model=MODEL,
-        messages=[
-            {"role": "system", "content": "You are a helpful assistant."},
-            {"role": "user", "content": prompt},
-        ],
-        temperature=0.6,
-    )
+    response = client.chat.completions.create(
+    model=MODEL,
+    messages=[
+        {"role": "system", "content": system_prompt},
+        {"role": "user", "content": user_prompt},
+    ],
+    temperature=0.6,
+)
     return name, response.choices[0].message.content.strip()
 
 
