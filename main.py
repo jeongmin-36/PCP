@@ -118,20 +118,22 @@ if submitted:
 
     edited_sections = {}
     full_output = section1 + "\n\n"
-
+    
     for idx, (name, content) in enumerate(results):
-        edited = st.text_area(
-            label=f"✏️ {name}",
-            value=content,
-            height=300,
-            key=f"edit_{idx}"
-        )
-        edited_sections[name] = edited
-        full_output += f"\n\n### {name}\n\n{edited}"
-    if "3.3 Budget" in edited_sections:
-        st.markdown("### 3.3 Budget Table")
-        st.markdown(edited_sections["3.3 Budget"]) 
-        st.markdown(edited_sections["3.3 Budget"], unsafe_allow_html=True) 
+        if name == "3.3 Budget":
+            st.markdown(f"### 📊 {name}")
+            st.markdown(content)  # Markdown 표로 바로 렌더링
+            edited_sections[name] = content
+        else:
+            edited = st.text_area(
+                label=f"✏️ {name}",
+                value=content,
+                height=300,
+                key=f"edit_{idx}"
+            )
+            edited_sections[name] = edited
+    
+        full_output += f"\n\n### {name}\n\n{edited_sections[name]}"
 
     # -------------------- DOWNLOAD --------------------
     st.download_button(
