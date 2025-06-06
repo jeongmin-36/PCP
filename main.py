@@ -123,7 +123,6 @@ if submitted:
         for idx, (name, content) in enumerate(st.session_state.generated_results):
             state_key = f"edit_{idx}"
     
-            # 최초 한 번만 초기화
             if state_key not in st.session_state:
                 st.session_state[state_key] = content
     
@@ -140,11 +139,11 @@ if submitted:
     
             edited_sections[name] = st.session_state[state_key]
             full_output += f"\n\n### {name}\n\n{edited_sections[name]}"
-
-    # -------------------- DOWNLOAD --------------------
-    st.download_button(
-        label="💾 Download as Markdown",
-        data=full_output,
-        file_name="KOICA_PCP.md",
-        mime="text/markdown"
-    )
+    
+        # ✅ full_output 정의된 블록 안에서 다운로드 버튼 렌더링
+        st.download_button(
+            label="💾 Download as Markdown",
+            data=full_output,
+            file_name="KOICA_PCP.md",
+            mime="text/markdown"
+        )
