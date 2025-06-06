@@ -82,11 +82,33 @@ api_key = os.getenv("OPENAI_API_KEY")
 if not api_key:
     raise ValueError("OPENAI_API_KEY 환경변수가 설정되지 않았습니다.")
 
-with st.form(key="section1_form"):
-    st.markdown("### ✍️ Write **Section 1. Basic Project Information**")
-    section1_text = st.text_area(
-        "Paste or write Section 1 here (markdown supported)", height=300, key="section1"
-    )
+with st.form("section1_form"):
+    country = st.text_input("Country", placeholder="e.g., Nepal")
+    title = st.text_input("Title", placeholder="e.g., Digital Agriculture Enhancement Project")
+    location = st.text_input("Location(s)", placeholder="e.g., Provinces 3 and 4")
+    duration = st.text_input("Duration", placeholder="e.g., 36 months (2027–2030)")
+    budget = st.text_area("Budget (total)", placeholder="e.g., KOICA: USD 3 million...")
+    objectives = st.text_area("Objectives", placeholder="e.g., To strengthen digital capacity...")
+    beneficiary = st.text_input("Beneficiary", placeholder="e.g., 5,000 farmers, local gov’t")
+    organization = st.text_area("Implementing organization", placeholder="e.g., Ministry of Agriculture, etc.")
+
+    submitted = st.form_submit_button("Submit SECTION 1")
+
+if submitted:
+    section1 = f"""\
+**SECTION 1. BASIC PROJECT INFORMATION**
+
+- **Country**: {country}
+- **Title**: {title}
+- **Location(s)**: {location}
+- **Duration**: {duration}
+- **Budget (total)**: {budget}
+- **Objectives**: {objectives}
+- **Beneficiary**: {beneficiary}
+- **Implementing organization**: {organization}
+"""
+    st.markdown("### Preview of SECTION 1")
+    st.markdown(section1)
     language = st.selectbox("Output language", ["English", "한국어"], key="lang")
     submitted = st.form_submit_button("Generate Remaining Sections 🚀")
 
