@@ -114,7 +114,6 @@ if submitted:
 
     # -------------------- DISPLAY & EDIT --------------------
     st.markdown("---")
-    st.markdown("### 📝 Edit Each Generated Section (Optional)")
 
     # 1. 사용자 입력 → 제출 시 GPT 호출 및 세션에 저장
     if submitted and "generated_results" not in st.session_state:
@@ -131,7 +130,6 @@ if submitted:
     
     # 2. 결과가 세션에 저장되어 있다면 출력
     if "generated_results" in st.session_state and st.session_state.generated_results:
-        st.markdown("### 📝 Edit Each Generated Section (Optional)")
         edited_sections = {}
         full_output = section1 + "\n\n"
     
