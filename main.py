@@ -102,18 +102,23 @@ if submitted:
         )
         return name, response.choices[0].message.content
 
-    # -------------------- GENERATE SECTIONS IN PARALLEL --------------------
-    st.markdown("### 🛠 Generating sections 2–5...")
-    results = []
+    # -------------------- DISPLAY & EDIT GENERATED SECTIONS --------------------
+    st.markdown("---")
+    st.markdown("### 📝 Edit Each Generated Section (Optional)")
+    
+    edited_sections = {}
+    full_output = section1 + "\n\n"
+    
+    for idx, (name, content) in enumerate(results):
+        edited = st.text_area(
+            label=f"✏️ {name}",
+            value=content,
+            height=300,
+            key=f"edit_{idx}"  # 유니크 키 필수
+        )
+        edited_sections[name] = edited
+        full_output += f"\n\n### {name}\n\n{edited}"
 
-    with st.spinner("Working..."):
-        with ThreadPoolExecutor() as executor:
-            futures = [
-                executor.submit(generate_subsection, name, inst, section1, language)
-                for name, inst in subsections.items()
-            ]
-            for future in futures:
-                results.append(future.result())
 
     # -------------------- DISPLAY OUTPUT --------------------
     st.markdown("### ✅ SECTION 1")
