@@ -116,13 +116,27 @@ if submitted:
     st.markdown("---")
     st.markdown("### 📝 Edit Each Generated Section (Optional)")
 
-    if "generated_results" in st.session_state:
+    # 1. 사용자 입력 → 제출 시 GPT 호출 및 세션에 저장
+    if submitted and "generated_results" not in st.session_state:
+        st.session_state.generated_results = []
+    
+        with st.spinner("Generating..."):
+            with ThreadPoolExecutor() as executor:
+                futures = [
+                    executor.submit(generate_subsection, name, inst, section1, language)
+                    for name, inst in subsections.items()
+                ]
+                for future in futures:
+                    st.session_state.generated_results.append(future.result())
+    
+    # 2. 결과가 세션에 저장되어 있다면 출력
+    if "generated_results" in st.session_state and st.session_state.generated_results:
+        st.markdown("### 📝 Edit Each Generated Section (Optional)")
         edited_sections = {}
         full_output = section1 + "\n\n"
     
         for idx, (name, content) in enumerate(st.session_state.generated_results):
             state_key = f"edit_{idx}"
-    
             if state_key not in st.session_state:
                 st.session_state[state_key] = content
     
@@ -140,7 +154,6 @@ if submitted:
             edited_sections[name] = st.session_state[state_key]
             full_output += f"\n\n### {name}\n\n{edited_sections[name]}"
     
-        # ✅ full_output 정의된 블록 안에서 다운로드 버튼 렌더링
         st.download_button(
             label="💾 Download as Markdown",
             data=full_output,
