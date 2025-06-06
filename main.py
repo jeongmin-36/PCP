@@ -34,8 +34,6 @@ SUBSECTIONS: Dict[str, str] = {
     "5 Project Management and Implementation": "Outline governance and coordination mechanisms (steering committee, executing agency, reporting). State indicative timeline and risks."  # noqa:E501
 }
 
-client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
-
 def generate_subsection(name: str, instruction: str, section1: str, language: str) -> Tuple[str, str]:
     """Call OpenAI to create *one* subsection using Section 1 as context."""
     
@@ -79,9 +77,10 @@ def assemble_pcp(section1: str, generated: Dict[str, str]) -> str:
 st.set_page_config(page_title="KOICA PCP Generator", page_icon="📄", layout="centered")
 st.title("📄 KOICA PCP Generator (Section 1 → AI remaining)")
 
-if not openai.api_key:
-    st.error("OPENAI_API_KEY environment variable not set.")
-    st.stop()
+# 안전하게 API 키 불러오기
+api_key = os.getenv("OPENAI_API_KEY")
+if not api_key:
+    raise ValueError("OPENAI_API_KEY 환경변수가 설정되지 않았습니다.")
 
 with st.form(key="section1_form"):
     st.markdown("### ✍️ Write **Section 1. Basic Project Information**")
