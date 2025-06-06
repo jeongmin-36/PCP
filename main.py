@@ -13,10 +13,10 @@ import os
 import textwrap
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from typing import Dict, Tuple
-from openai import OpenAI
-import os
+import openai
+
 import streamlit as st
-client = OpenAI(api_key=os.environ["OPENAI_API_KEY"])
+openai.api_key = os.getenv("OPENAI_API_KEY")
 
 # ------------------------------ CONFIG ---------------------------------------
 MODEL = "gpt-4o-mini"  # cheaper + fast; swap to gpt-4o if needed
