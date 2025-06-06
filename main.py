@@ -1,102 +1,35 @@
-"""Interactive Streamlit app ‑ users author **Section 1** first, then the app
-parallel‑generates the remaining KOICA PCP sections (2.x – 5) using OpenAI.
-
-Run:
-> export OPENAI_API_KEY="sk‑..."
-> pip install streamlit openai
-> streamlit run streamlit_pcp_generator.py
-"""
-
-from __future__ import annotations
-
-import os
-import textwrap
-from concurrent.futures import ThreadPoolExecutor, as_completed
-from typing import Dict, Tuple
-from openai import OpenAI
 import os
 import streamlit as st
-client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+import textwrap
+from typing import Tuple
+from concurrent.futures import ThreadPoolExecutor
+from openai import OpenAI
 
-
-
-
-# ------------------------------ CONFIG ---------------------------------------
-MODEL = "gpt-4o" 
-
-SUBSECTIONS: Dict[str, str] = {
-    "2.1 Situation Analysis": "Explain the current social, economic, and sector‑specific context relevant to the project. Provide key statistics where possible.",
-    "2.2 Country Development Strategies and Policies": "Describe national strategies, policies, or plans that align with the project objective. Reference policy names and publication years.",
-    "2.3 Justification for Intervention": "Why is KOICA support necessary? Highlight problem magnitude, KOICA’s comparative advantage, and alignment with SDGs.",
-    "2.4 Lessons Learned": "Summarize lessons from similar past projects (KOICA or other donors). Include at least two concrete lessons.",
-    "3 Project Description": "Provide Objective, Expected Outcomes, Outputs, and Key Activities (high‑level workplan). Use a bullet list for Outputs and Activities.",
-    "4 Stakeholder Analysis": "Identify target beneficiaries (with numbers) and other stakeholders with their roles and interests.",
-    "5 Project Management and Implementation": "Outline governance and coordination mechanisms (steering committee, executing agency, reporting). State indicative timeline and risks."  # noqa:E501
-}
-
-def generate_subsection(name: str, instruction: str, section1: str, language: str) -> Tuple[str, str]:
-    """Call OpenAI to create *one* subsection using Section 1 as context."""
-    
-    prompt = textwrap.dedent(
-        f"""
-        You are an international development expert preparing a KOICA bilateral Project/Program Concept Paper.
-        The user already drafted SECTION 1. Using that section **only as context**, write **{name}** in {language}.
-
-        Guidelines:
-        {instruction}
-
-        SECTION 1 (verbatim):
-        {section1.strip()}
-        """
-    )
-
-    response = client.chat.completions.create(
-        model="gpt-4o",
-        messages=[
-            {"role": "system", "content": "You are a helpful assistant that drafts concept papers for KOICA projects."},
-            {"role": "user", "content": prompt}
-        ],
-        temperature=0.7,
-    )
-
-    generated_text = response.choices[0].message.content
-    return name, generated_text
-
-def assemble_pcp(section1: str, generated: Dict[str, str]) -> str:
-    """Concatenate Section 1 + generated subsections into full PCP markdown."""
-    lines = ["# Project/Program Concept Paper\n", "## Section 1. Basic Project Information\n", section1.strip(), "\n"]
-    for key in SUBSECTIONS:
-        if key in generated:
-            lines.append(f"## {key}\n")
-            lines.append(generated[key])
-            lines.append("\n")
-    return "\n".join(lines)
-
-# ------------------------------ UI ------------------------------------------
-
-st.set_page_config(page_title="KOICA PCP Generator", page_icon="📄", layout="centered")
-st.title("📄 KOICA PCP Generator (Section 1 → AI remaining)")
-
-# 안전하게 API 키 불러오기
+# -------------------- SETUP --------------------
 api_key = os.getenv("OPENAI_API_KEY")
 if not api_key:
-    raise ValueError("OPENAI_API_KEY 환경변수가 설정되지 않았습니다.")
+    st.stop("❌ OPENAI_API_KEY 환경변수가 설정되지 않았습니다.")
+client = OpenAI(api_key=api_key)
+
+# -------------------- SECTION 1 INPUT --------------------
+st.title("📄 KOICA Project Concept Generator")
+st.markdown("Fill in the basic info for **SECTION 1**. Leave fields blank if unsure.")
 
 with st.form("section1_form"):
     country = st.text_input("Country", placeholder="e.g., Nepal")
-    title = st.text_input("Title", placeholder="e.g., Digital Agriculture Enhancement Project")
+    title = st.text_input("Title", placeholder="e.g., Digital Agriculture Enhancement")
     location = st.text_input("Location(s)", placeholder="e.g., Provinces 3 and 4")
     duration = st.text_input("Duration", placeholder="e.g., 36 months (2027–2030)")
-    budget = st.text_area("Budget (total)", placeholder="e.g., KOICA: USD 3 million...")
-    objectives = st.text_area("Objectives", placeholder="e.g., To strengthen digital capacity...")
-    beneficiary = st.text_input("Beneficiary", placeholder="e.g., 5,000 farmers, local gov’t")
-    organization = st.text_area("Implementing organization", placeholder="e.g., Ministry of Agriculture, etc.")
+    budget = st.text_area("Budget (total)", placeholder="KOICA: USD 3M...\nCo-funding: USD 500K...")
+    objectives = st.text_area("Objectives", placeholder="To strengthen digital capacity of farmers...")
+    beneficiary = st.text_input("Beneficiary", placeholder="5,000 farmers, local gov’t")
+    organization = st.text_area("Implementing Organization", placeholder="Ministry of Agriculture, etc.")
 
-    submitted = st.form_submit_button("Submit SECTION 1")
+    submitted = st.form_submit_button("Generate Remaining Sections 🚀")
 
+# -------------------- BUILD SECTION 1 --------------------
 if submitted:
-    section1 = f"""\
-**SECTION 1. BASIC PROJECT INFORMATION**
+    section1 = f"""**SECTION 1. BASIC PROJECT INFORMATION**
 
 - **Country**: {country}
 - **Title**: {title}
@@ -105,42 +38,70 @@ if submitted:
 - **Budget (total)**: {budget}
 - **Objectives**: {objectives}
 - **Beneficiary**: {beneficiary}
-- **Implementing organization**: {organization}
+- **Implementing Organization**: {organization}
 """
-    st.markdown("### Preview of SECTION 1")
+
+    st.markdown("### ✅ SECTION 1 Preview")
     st.markdown(section1)
-    language = st.selectbox("Output language", ["English", "한국어"], key="lang")
-    submitted = st.form_submit_button("Generate Remaining Sections 🚀")
 
-if submitted and section1_text.strip():
-    st.info("Generating Sections 2–5 in parallel. This may take ~30‑60 s…")
+    # -------------------- SECTION 2+ DEFINITIONS --------------------
+    subsections = {
+        "2.1 Development Problem": "Briefly describe the core development issue the project aims to solve.",
+        "2.2 National Development Plan Alignment": "Explain how the project aligns with the country’s development strategy.",
+        "2.3 KOICA Priority Alignment": "Explain how the project aligns with KOICA’s priority areas.",
+        "3. Expected Results": "Summarize expected outcomes and outputs.",
+        "4. Sustainability and Risk": "Describe sustainability plan and major risks.",
+        "5. Lessons Learned": "Incorporate lessons from past projects or evaluations."
+    }
 
-    progress = st.progress(0)
-    results: Dict[str, str] = {}
-    total = len(SUBSECTIONS)
+    language = "English"
 
-    with ThreadPoolExecutor(max_workers=min(6, total)) as executor:
-        futures = {
-            executor.submit(generate_subsection, name, instr, section1_text, language): name
-            for name, instr in SUBSECTIONS.items()
-        }
-        completed = 0
-        for future in as_completed(futures):
-            name, text = future.result()
-            results[name] = text
-            completed += 1
-            progress.progress(completed / total)
-            st.success(f"Done: {name}")
+    def generate_subsection(name: str, instruction: str, section1_text: str, language: str) -> Tuple[str, str]:
+        prompt = textwrap.dedent(f"""
+        You are an international development expert preparing a KOICA bilateral Project/Program Concept Paper.
+        The user already drafted SECTION 1. Using that section **only as context**, write **{name}** in {language}.
 
-    full_pcp = assemble_pcp(section1_text, results)
+        Guidelines:
+        {instruction}
 
-    st.markdown("---")
-    st.markdown("## 📄 Generated PCP Preview")
-    st.text_area("Full PCP", full_pcp, height=1000)
+        SECTION 1 (verbatim):
+        {section1_text.strip()}
+        """)
+        
+        response = client.chat.completions.create(
+            model="gpt-4o",
+            messages=[
+                {"role": "system", "content": "You are a helpful assistant that drafts KOICA concept papers."},
+                {"role": "user", "content": prompt}
+            ],
+            temperature=0.7,
+        )
+        return name, response.choices[0].message.content
 
+    # -------------------- GENERATE SECTIONS IN PARALLEL --------------------
+    st.markdown("### 🛠 Generating sections 2–5...")
+    results = []
+
+    with st.spinner("Working..."):
+        with ThreadPoolExecutor() as executor:
+            futures = [
+                executor.submit(generate_subsection, name, inst, section1, language)
+                for name, inst in subsections.items()
+            ]
+            for future in futures:
+                results.append(future.result())
+
+    # -------------------- DISPLAY OUTPUT --------------------
+    full_output = section1 + "\n\n"
+    for name, content in results:
+        st.markdown(f"### {name}")
+        st.markdown(content)
+        full_output += f"\n\n### {name}\n\n{content}"
+
+    # -------------------- DOWNLOAD --------------------
     st.download_button(
-        "💾 Download as Markdown", data=full_pcp, file_name="pcp.md", mime="text/markdown"
+        label="💾 Download as Markdown",
+        data=full_output,
+        file_name="KOICA_PCP.md",
+        mime="text/markdown"
     )
-
-elif submitted:
-    st.warning("Section 1 cannot be empty. Please write it first.")
