@@ -11,10 +11,12 @@ if not api_key:
     st.stop("❌ OPENAI_API_KEY 환경변수가 설정되지 않았습니다.")
 client = OpenAI(api_key=api_key)
 
-# -------------------- SECTION 1 INPUT --------------------
-st.title("📄 KOICA Project Concept Generator")
-st.markdown("Fill in the basic info for **SECTION 1**. Leave fields blank if unsure.")
+# -------------------- PAGE --------------------
+st.set_page_config(page_title="KOICA PCP Generator", page_icon="📄", layout="centered")
+st.title("📄 KOICA Project Concept Paper Generator")
+st.markdown("### ✍️ Fill out Section 1")
 
+# -------------------- SECTION 1 INPUT --------------------
 with st.form("section1_form"):
     country = st.text_input("Country", placeholder="e.g., Nepal")
     title = st.text_input("Title", placeholder="e.g., Digital Agriculture Enhancement")
@@ -27,7 +29,7 @@ with st.form("section1_form"):
 
     submitted = st.form_submit_button("Generate Remaining Sections 🚀")
 
-# -------------------- BUILD SECTION 1 --------------------
+# -------------------- AFTER SUBMIT --------------------
 if submitted:
     section1 = f"""**SECTION 1. BASIC PROJECT INFORMATION**
 
@@ -44,39 +46,32 @@ if submitted:
     st.markdown("### ✅ SECTION 1 Preview")
     st.markdown(section1)
 
-    # -------------------- SECTION 2+ DEFINITIONS --------------------
+    # -------------------- SUBSECTION DEFINITIONS --------------------
     subsections = {
-    # SECTION 2
-    "2.1 Development Problem": "Briefly describe the core development issue the project aims to solve.",
-    "2.2 National Development Plan Alignment": "Explain how the project aligns with the country’s development strategy.",
-    "2.3 KOICA Priority Alignment": "Explain how the project aligns with KOICA’s priority areas.",
-
-    # SECTION 3
-    "3.1 Objective/Outcome/Output": "Outline objectives, expected outcomes, and outputs of the Project.",
-    "3.2 Activities": "Describe major activities, timeline, responsible bodies, and implementation sequence.",
-    "3.3 Budget": (
-    "Generate a Markdown table with the following columns:\n\n"
-    "Output | Activity | Proposed budget (in USD)\n\n"
-    "Provide 2–4 realistic example rows based on KOICA-type projects. "
-    "Make sure it includes sample budgets (e.g., 1,000,000), and only output the markdown table—no explanation."
-    ),
-
-    # SECTION 4
-    "4.1 Target Beneficiary": (
-        "Describe a) direct and indirect beneficiaries with numbers and gender segregation, "
-        "b) how they were selected, c) how they were involved in the project design and will be involved in implementation."
-    ),
-    "4.2 Stakeholders": (
-        "Analyze recipient organization’s capacity, budget, size, and also describe other stakeholders "
-        "with roles and coordination mechanisms."
-    ),
-
-    # SECTION 5
-    "5.1 Project Management": (
-        "Describe who will manage and operate the project, how coordination will happen with other programs, "
-        "and planning/operational responsibilities."
-    ),
-}
+        "2.1 Development Problem": "Briefly describe the core development issue the project aims to solve.",
+        "2.2 National Development Plan Alignment": "Explain how the project aligns with the country’s development strategy.",
+        "2.3 KOICA Priority Alignment": "Explain how the project aligns with KOICA’s priority areas.",
+        "3.1 Objective/Outcome/Output": "Outline objectives, expected outcomes, and outputs of the Project.",
+        "3.2 Activities": "Describe major activities, timeline, responsible bodies, and implementation sequence.",
+        "3.3 Budget": (
+            "Generate a Markdown table with the following columns:\n\n"
+            "Output | Activity | Proposed budget (in USD)\n\n"
+            "Provide 2–4 realistic example rows based on KOICA-type projects. "
+            "Make sure it includes sample budgets (e.g., 1,000,000), and only output the markdown table—no explanation."
+        ),
+        "4.1 Target Beneficiary": (
+            "Describe a) direct and indirect beneficiaries with numbers and gender segregation, "
+            "b) how they were selected, c) how they were involved in the project design and will be involved in implementation."
+        ),
+        "4.2 Stakeholders": (
+            "Analyze recipient organization’s capacity, budget, size, and also describe other stakeholders "
+            "with roles and coordination mechanisms."
+        ),
+        "5.1 Project Management": (
+            "Describe who will manage and operate the project, how coordination will happen with other programs, "
+            "and planning/operational responsibilities."
+        ),
+    }
 
     language = "English"
 
@@ -91,7 +86,7 @@ if submitted:
         SECTION 1 (verbatim):
         {section1_text.strip()}
         """)
-        
+
         response = client.chat.completions.create(
             model="gpt-4o",
             messages=[
