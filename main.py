@@ -59,7 +59,7 @@ if submitted:
             "| Output | Activity | Proposed budget (in USD) |\n"
             "|--------|----------|---------------------------|\n"
             "Only output the table—no explanation."
-        )
+        ),
 
         "4.1 Target Beneficiary": (
             "Describe a) direct and indirect beneficiaries with numbers and gender segregation, "
