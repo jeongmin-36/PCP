@@ -13,13 +13,16 @@ import os
 import textwrap
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from typing import Dict, Tuple
-import openai
-
+from openai import OpenAI
+import os
 import streamlit as st
-openai.api_key = os.getenv("OPENAI_API_KEY")
+client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+
+
+
 
 # ------------------------------ CONFIG ---------------------------------------
-MODEL = "gpt-4o-mini"  # cheaper + fast; swap to gpt-4o if needed
+MODEL = "gpt-4o" 
 
 SUBSECTIONS: Dict[str, str] = {
     "2.1 Situation Analysis": "Explain the current social, economic, and sector‑specific context relevant to the project. Provide key statistics where possible.",
@@ -31,32 +34,35 @@ SUBSECTIONS: Dict[str, str] = {
     "5 Project Management and Implementation": "Outline governance and coordination mechanisms (steering committee, executing agency, reporting). State indicative timeline and risks."  # noqa:E501
 }
 
-# ------------------------------ HELPERS --------------------------------------
+client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 def generate_subsection(name: str, instruction: str, section1: str, language: str) -> Tuple[str, str]:
-    """Call OpenAI to create *one* subsection using Section 1 as context."""
+    """Call OpenAI to create *one* subsection using Section 1 as context."""
+    
     prompt = textwrap.dedent(
         f"""
         You are an international development expert preparing a KOICA bilateral Project/Program Concept Paper.
-        The user already drafted SECTION 1. Using that section **only as context**, write **{name}** in {language}.
+        The user already drafted SECTION 1. Using that section **only as context**, write **{name}** in {language}.
 
         Guidelines:
         {instruction}
 
-        SECTION 1 (verbatim):
+        SECTION 1 (verbatim):
+        {section1.strip()}
         """
-    ) + section1.strip()
+    )
 
     response = client.chat.completions.create(
-    model=MODEL,
-    messages=[
-        {"role": "system", "content": system_prompt},
-        {"role": "user", "content": user_prompt},
-    ],
-    temperature=0.6,
-)
-    return name, response.choices[0].message.content.strip()
+        model="gpt-4o",
+        messages=[
+            {"role": "system", "content": "You are a helpful assistant that drafts concept papers for KOICA projects."},
+            {"role": "user", "content": prompt}
+        ],
+        temperature=0.7,
+    )
 
+    generated_text = response.choices[0].message.content
+    return name, generated_text
 
 def assemble_pcp(section1: str, generated: Dict[str, str]) -> str:
     """Concatenate Section 1 + generated subsections into full PCP markdown."""
