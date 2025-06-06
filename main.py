@@ -117,29 +117,29 @@ if submitted:
     st.markdown("### 📝 Edit Each Generated Section (Optional)")
 
     if "generated_results" in st.session_state:
-    edited_sections = {}
-    full_output = section1 + "\n\n"
-
-    for idx, (name, content) in enumerate(st.session_state.generated_results):
-        state_key = f"edit_{idx}"
-
-        # 최초 한 번만 초기화
-        if state_key not in st.session_state:
-            st.session_state[state_key] = content
-
-        if name == "3.3 Budget":
-            st.markdown(f"### 📊 {name}")
-            st.markdown(st.session_state[state_key])
-        else:
-            st.text_area(
-                label=f"✏️ {name}",
-                value=st.session_state[state_key],
-                height=300,
-                key=state_key
-            )
-
-        edited_sections[name] = st.session_state[state_key]
-        full_output += f"\n\n### {name}\n\n{edited_sections[name]}"
+        edited_sections = {}
+        full_output = section1 + "\n\n"
+    
+        for idx, (name, content) in enumerate(st.session_state.generated_results):
+            state_key = f"edit_{idx}"
+    
+            # 최초 한 번만 초기화
+            if state_key not in st.session_state:
+                st.session_state[state_key] = content
+    
+            if name == "3.3 Budget":
+                st.markdown(f"### 📊 {name}")
+                st.markdown(st.session_state[state_key])
+            else:
+                st.text_area(
+                    label=f"✏️ {name}",
+                    value=st.session_state[state_key],
+                    height=300,
+                    key=state_key
+                )
+    
+            edited_sections[name] = st.session_state[state_key]
+            full_output += f"\n\n### {name}\n\n{edited_sections[name]}"
 
     # -------------------- DOWNLOAD --------------------
     st.download_button(
