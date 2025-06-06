@@ -54,11 +54,13 @@ if submitted:
         "3.1 Objective/Outcome/Output": "Outline objectives, expected outcomes, and outputs of the Project.",
         "3.2 Activities": "Describe major activities, timeline, responsible bodies, and implementation sequence.",
         "3.3 Budget": (
-            "Generate a Markdown table with the following columns:\n\n"
-            "Output | Activity | Proposed budget (in USD)\n\n"
-            "Provide 2–4 realistic example rows based on KOICA-type projects. "
-            "Make sure it includes sample budgets (e.g., 1,000,000), and only output the markdown table—no explanation."
-        ),
+            "Generate a Markdown table **with a header separator line**. "
+            "Use this format:\n\n"
+            "| Output | Activity | Proposed budget (in USD) |\n"
+            "|--------|----------|---------------------------|\n"
+            "Only output the table—no explanation."
+        )
+
         "4.1 Target Beneficiary": (
             "Describe a) direct and indirect beneficiaries with numbers and gender segregation, "
             "b) how they were selected, c) how they were involved in the project design and will be involved in implementation."
@@ -126,6 +128,10 @@ if submitted:
         )
         edited_sections[name] = edited
         full_output += f"\n\n### {name}\n\n{edited}"
+    if "3.3 Budget" in edited_sections:
+        st.markdown("### 3.3 Budget Table")
+        st.markdown(edited_sections["3.3 Budget"]) 
+        st.markdown(edited_sections["3.3 Budget"], unsafe_allow_html=True) 
 
     # -------------------- DOWNLOAD --------------------
     st.download_button(
