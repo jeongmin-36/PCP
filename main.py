@@ -119,21 +119,27 @@ if submitted:
     edited_sections = {}
     full_output = section1 + "\n\n"
     
-    for idx, (name, content) in enumerate(results):
+    for idx, (name, content) in enumerate(st.session_state.generated_results):
+        state_key = f"edit_{idx}"
+    
+        # 초기화: 첫 실행 시에만 세션에 값 저장
+        if state_key not in st.session_state:
+            st.session_state[state_key] = content
+    
         if name == "3.3 Budget":
             st.markdown(f"### 📊 {name}")
-            st.markdown(content)  # Markdown 표로 바로 렌더링
-            edited_sections[name] = content
+            st.markdown(st.session_state[state_key])
         else:
-            edited = st.text_area(
+            st.text_area(
                 label=f"✏️ {name}",
-                value=content,
+                value=st.session_state[state_key],
                 height=300,
-                key=f"edit_{idx}"
+                key=state_key  # 유지 핵심: 이 key가 값 상태를 기억함
             )
-            edited_sections[name] = edited
     
+        edited_sections[name] = st.session_state[state_key]
         full_output += f"\n\n### {name}\n\n{edited_sections[name]}"
+
 
     # -------------------- DOWNLOAD --------------------
     st.download_button(
