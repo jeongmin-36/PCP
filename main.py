@@ -54,7 +54,12 @@ if submitted:
     # SECTION 3
     "3.1 Objective/Outcome/Output": "Outline objectives, expected outcomes, and outputs of the Project.",
     "3.2 Activities": "Describe major activities, timeline, responsible bodies, and implementation sequence.",
-    "3.3 Budget": "Provide an illustrative output-activity-budget table with sample values, using markdown format.",
+    "3.3 Budget": (
+    "Generate a Markdown table with the following columns:\n\n"
+    "Output | Activity | Proposed budget (in USD)\n\n"
+    "Provide 2–4 realistic example rows based on KOICA-type projects. "
+    "Make sure it includes sample budgets (e.g., 1,000,000), and only output the markdown table—no explanation."
+    ),
 
     # SECTION 4
     "4.1 Target Beneficiary": (
@@ -111,11 +116,20 @@ if submitted:
                 results.append(future.result())
 
     # -------------------- DISPLAY OUTPUT --------------------
+    st.markdown("### ✅ SECTION 1")
+    st.markdown(section1)
     full_output = section1 + "\n\n"
+    
+    # SECTION 2~5 출력 및 수정 가능
+    st.markdown("---")
+    st.markdown("### 📝 Edit Each Generated Section (Optional)")
+    
+    edited_sections = {}
+
     for name, content in results:
-        st.markdown(f"### {name}")
-        st.markdown(content)
-        full_output += f"\n\n### {name}\n\n{content}"
+        edited = st.text_area(f"✏️ {name}", value=content, height=250)
+        edited_sections[name] = edited
+        full_output += f"\n\n### {name}\n\n{edited}"
 
     # -------------------- DOWNLOAD --------------------
     st.download_button(
