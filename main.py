@@ -102,37 +102,33 @@ if submitted:
         )
         return name, response.choices[0].message.content
 
-    # -------------------- DISPLAY & EDIT GENERATED SECTIONS --------------------
+    # -------------------- GENERATE SECTIONS IN PARALLEL --------------------
+    st.markdown("### 🛠 Generating sections 2–5...")
+    results = []
+
+    with st.spinner("Working..."):
+        with ThreadPoolExecutor() as executor:
+            futures = [
+                executor.submit(generate_subsection, name, inst, section1, language)
+                for name, inst in subsections.items()
+            ]
+            for future in futures:
+                results.append(future.result())
+
+    # -------------------- DISPLAY & EDIT --------------------
     st.markdown("---")
     st.markdown("### 📝 Edit Each Generated Section (Optional)")
-    
+
     edited_sections = {}
     full_output = section1 + "\n\n"
-    
+
     for idx, (name, content) in enumerate(results):
         edited = st.text_area(
             label=f"✏️ {name}",
             value=content,
             height=300,
-            key=f"edit_{idx}"  # 유니크 키 필수
+            key=f"edit_{idx}"
         )
-        edited_sections[name] = edited
-        full_output += f"\n\n### {name}\n\n{edited}"
-
-
-    # -------------------- DISPLAY OUTPUT --------------------
-    st.markdown("### ✅ SECTION 1")
-    st.markdown(section1)
-    full_output = section1 + "\n\n"
-    
-    # SECTION 2~5 출력 및 수정 가능
-    st.markdown("---")
-    st.markdown("### 📝 Edit Each Generated Section (Optional)")
-    
-    edited_sections = {}
-
-    for name, content in results:
-        edited = st.text_area(f"✏️ {name}", value=content, height=250)
         edited_sections[name] = edited
         full_output += f"\n\n### {name}\n\n{edited}"
 
